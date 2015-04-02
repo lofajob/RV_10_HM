@@ -1,1 +1,1 @@
-credentials = ('localhost', 'root', 'Lofa666', 'test_db')
+credentials = ('localhost', 'testuser', 'q1234567890', 'test_db')
