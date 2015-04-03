@@ -39,7 +39,8 @@ class Model(object):
         Upgrade database fields method
         """
         self._sql = "INSERT INTO f_table\
-                     VALUES ('%s', '%s', %d)" % (attr1, attr2, attr3)
+                     VALUES ('%s', '%s', %d)" \
+                     % (attr1, attr2, attr3)
         try:
             self.cursor.execute(self._sql)
             self.conncection.commit()
