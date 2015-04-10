@@ -6,10 +6,9 @@ def facade_decorator(method):
     return wrapper
 
 
-
 class Ex1():
     """Just class"""
-        
+
     def do_smth(self):
         print "Hello"
 
@@ -20,7 +19,7 @@ class Ex1():
 
 class Ex2():
     """Another class"""
-    
+
     def do_smth(self):
         print "World"
 
@@ -31,7 +30,7 @@ class Ex2():
 
 class Ex3():
     """Third class"""
-    
+
     def do_smth(self):
         print "and Universe"
 

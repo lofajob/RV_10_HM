@@ -13,9 +13,9 @@ class Model(object):
     error_empty = "Unable to fecth data. Probably database is empty"
 
     def __init__(self, *credentials):
-        # Open conncection
-        self.conncection = MySQLdb.connect(*credentials)
-        self.cursor = self.conncection.cursor()
+        # Open connection
+        self.connection = MySQLdb.connect(*credentials)
+        self.cursor = self.connection.cursor()
 
     def create(self):
         """
@@ -43,10 +43,10 @@ class Model(object):
                      % (attr1, attr2, attr3)
         try:
             self.cursor.execute(self._sql)
-            self.conncection.commit()
+            self.connection.commit()
             print "Database was successfuly updated"
         except:
-            self.conncection.rollback
+            self.connection.rollback
             print error_message
 
     def read(self, param=None):
@@ -75,7 +75,7 @@ class Model(object):
                 print Model.error_empty
 
     def close(self):
-        self.conncection.close()
+        self.connection.close()
 
 
 if __name__ == "__main__":
