@@ -6,82 +6,106 @@ import MySQLdb
 from database_settings import credentials
 
 
-class Model(object):
+class Orm(object):
     """Class for simple imitation ORM"""
-    # Define error messages
+    # Define error message
     error_message = "An error occurred with database"
-    error_empty = "Unable to fecth data. Probably database is empty"
 
     def __init__(self, *credentials):
         # Open connection
         self.connection = MySQLdb.connect(*credentials)
         self.cursor = self.connection.cursor()
 
-    def create(self):
+    def _execute_query(self, query, message='Success'):
+        if query:
+            try:
+                self.cursor.execute(query)
+                self.connection.commit()
+                print message
+            except:
+                self.connection.rollback()
+                print self.error_message
+
+    def create(self, table, columns):
         """
-        Table create method
+        Table create method.
+        It takes two str attributes: first name of table,
+        second should be columns with the data_types parameters
+        example:
+        instant.create('table_name', 'col_1 varchar(80), col_2 int')
         """
-        self.cursor.execute("DROP TABLE IF EXISTS f_table")
+        # define query strings
+        _query =\
+            "CREATE TABLE %s(ID int NOT NULL AUTO_INCREMENT, %s, PRIMARY KEY (ID))"\
+            % (table, columns)
+        _drop_query = "DROP TABLE IF EXISTS %s" % table
+        message = "Table `%s` was successfully created" % table
 
-        self._sql = """CREATE TABLE f_table(
-                       col1 CHAR(10) NOT NULL,
-                       col2 CHAR(20),
-                       col3 INT)
-                    """
-        try:
-            self.cursor.execute(self._sql)
-            print "Table was successfuly created"
-        except:
-            print error_message
+        # delete table if exists
+        self.cursor.execute(_drop_query)
+        # implement query
+        self._execute_query(_query, message)
 
-    def insert(self, attr1, attr2, attr3):
+    def insert(self, table, values, columns=''):
         """
-        Upgrade database fields method
+        Insert entries method
+        example of calling:
+        instant.insert('table_name', ('value1', 2), 'Col_1, Col_2')
         """
-        self._sql = "INSERT INTO f_table\
-                     VALUES ('%s', '%s', %d)" \
-                     % (attr1, attr2, attr3)
-        try:
-            self.cursor.execute(self._sql)
-            self.connection.commit()
-            print "Database was successfuly updated"
-        except:
-            self.connection.rollback
-            print error_message
+        # define query strings
+        _query = "INSERT INTO %s (%s) VALUES %s" % (table, columns, values)
+        message = "Data was successfully inserted into `%s`" % table
 
-    def read(self, param=None):
+        # implement query
+        self._execute_query(_query, message)
+
+    def update(self, table, values, condition):
         """
-        Method for extracting
+        Update method
+        example of calling:
+        instant.update('table_name', 'Col_n = "some"', 'id=1')
         """
-        self._sql = "SELECT col1, col2, col3 FROM f_table"
+        # define query strings
+        _query = "UPDATE %s SET %s WHERE %s" % (table, values, condition)
+        message = "Table `%s` was successfully updated" % table
 
-        self.cursor.execute(self._sql)
+        # implement query
+        self._execute_query(_query, message)
+        
+    def read(self, table, columns, condition=''):
+        """
+        Method to select data from a database.
+        example of calling:
+        instant.read('table_name', 'col_1, col_n', 'col_n>2')
+        third argument(condition) isn't necessary
+        """
+        # define query strings
+        error_empty = "Unable to fecth data."
+        
+        if condition:
+            _query = "SELECT %s FROM %s WHERE %s" % (columns, table, condition)
+        else:
+            _query = "SELECT %s FROM %s" % (columns, table)
 
-        # Check whether we need to get all rows of data or one
-        if param == 'all':
-            self.results = self.cursor.fetchall()
+        #print _query 
+        self.cursor.execute(_query)
 
-            if self.results != ():
-                for result in self.results:
-                    print result[0],result[1],result[2]
-            else:
-                print Model.error_empty
+        results = self.cursor.fetchall()
 
-        elif param == None:
-            self.result = self.cursor.fetchone()
-            if self.result != ():
-                print self.result[0], self.result[1], self.result[2]
-            else:
-                print Model.error_empty
+        if results != ():
+            for result in results:
+                print result
+        else:
+            print error_empty
 
     def close(self):
         self.connection.close()
 
 
 if __name__ == "__main__":
-    e = Model(*credentials)
-    e.create()
-    e.insert('new', 'text', 99)
-    #e.read()
-    e.read('all')
-    e.close()
+    e = Orm(*credentials)
+    #e.create('new_table', 'Title varchar(12), NextCol int')
+    #e.insert('new_table', ('newnew', 12), 'Title, NextCol')
+    #e.update('new_table', 'NextCol = 32', 'id=1')
+    #e.read('new_table', 'Title, NextCol', 'id>0')
+    #e.close()
