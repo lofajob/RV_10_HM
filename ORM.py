@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import MySQLdb
+from warnings import filterwarnings
 
 from database_settings import credentials
 
@@ -35,14 +36,17 @@ class Orm(object):
         instant.create('table_name', 'col_1 varchar(80), col_2 int')
         """
         # define query strings
-        _query =\
-            "CREATE TABLE %s(ID int NOT NULL AUTO_INCREMENT, %s, PRIMARY KEY (ID))"\
-            % (table, columns)
+        _query = "CREATE TABLE %s\
+                  (ID int NOT NULL AUTO_INCREMENT, %s, PRIMARY KEY (ID))"\
+                  % (table, columns)
         _drop_query = "DROP TABLE IF EXISTS %s" % table
         message = "Table `%s` was successfully created" % table
 
+        filterwarnings('ignore', category = MySQLdb.Warning)
+
         # delete table if exists
         self.cursor.execute(_drop_query)
+
         # implement query
         self._execute_query(_query, message)
 
@@ -87,7 +91,6 @@ class Orm(object):
         else:
             _query = "SELECT %s FROM %s" % (columns, table)
 
-        #print _query 
         self.cursor.execute(_query)
 
         results = self.cursor.fetchall()
@@ -104,7 +107,7 @@ class Orm(object):
 
 if __name__ == "__main__":
     e = Orm(*credentials)
-    #e.create('new_table', 'Title varchar(12), NextCol int')
+    #e.create('new_table', 'Col1 varchar(12), Col2 int')
     #e.insert('new_table', ('newnew', 12), 'Title, NextCol')
     #e.update('new_table', 'NextCol = 32', 'id=1')
     #e.read('new_table', 'Title, NextCol', 'id>0')
